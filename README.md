@@ -21,3 +21,37 @@ Steps:
    3. `cancelItem`: Cancel a listing
    4. `updateListing`: Update price
    5. `withdrawProceeds`: Withdraw payment for my bought NFTs
+
+## Contract Natspec Boilerplate
+
+```js
+// SPDX-License-Identifier: MIT
+
+// 1: Pragma statements
+pragma solidity ^0.8.7;
+
+// 2: Import statements
+// 3: Interfaces (none in this case)
+// 4: Libraries (none in this case)
+// 5: Errors
+// 6: Contracts
+
+/// @title NFT Marketplace
+/// @author Fabio Bressler
+/// @notice Contract that...
+contract MyContractName {
+  // 6.a: Type declarations
+  // 6.b: State variables
+  // 6.c: Events
+  // 6.d: Modifiers
+  // 6.e: Functions
+  // 6.e.1: Constructor
+  // 6.e.2: Receive
+  // 6.e.3: Fallback
+  // 6.e.4: External
+  // 6.e.5: Public
+  // 6.e.6: Internal
+  // 6.e.7: Private
+  // 6.e.8: View / Pure
+}
+```
