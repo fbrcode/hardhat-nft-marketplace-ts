@@ -109,17 +109,8 @@ contract NftMarketplace {
     // 6.e.8: View / Pure
 }
 
-//  1. `listItem`: List NFTs on the marketplace
+//  1. `listItem`: List NFTs on the marketplace ✅
 //  2. `buyItem`: Buy the NFTs
 //  3. `cancelItem`: Cancel a listing
 //  4. `updateListing`: Update price
 //  5. `withdrawProceeds`: Withdraw payment for my bought NFTs
-
-/// @notice Request a random winner
-/// @dev Request a random winner (verifiably random) and automatically run through Chainlink Keepers
-/// @dev https://docs.chain.link/docs/chainlink-keepers/introduction/
-/// @dev Step 1 : request the random number
-/// @dev Step 2 : once we get it, do something with it
-/// @dev it is a 2 (two) transaction process: intentional to make it trully random
-// RENAMED : function requestRandomWinner() external {
-// FROM requestRandomWinner to performUpkeep
