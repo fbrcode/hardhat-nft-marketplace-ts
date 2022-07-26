@@ -13,6 +13,7 @@ import '@openzeppelin/contracts/token/ERC721/IERC721.sol';
 error NftMarketplace__PriceMustBeAboveZero();
 error NftMarketplace__NotApprovedForMarketplace();
 error NftMarketplace__ItemAlreadyListed(address nftAddress, uint256 tokenId);
+error NftMarketplace__NotOwner();
 
 // 6: Contracts
 
@@ -41,14 +42,25 @@ contract NftMarketplace {
 
     // 6.d: Modifiers
 
-    modifier notYetListed(
-        address nftAddress,
-        uint256 tokenId,
-        address owner
-    ) {
+    /// @notice Modifier to check if the NFT was already listed on the marketplace
+    modifier notYetListed(address nftAddress, uint256 tokenId) {
         Listing memory listing = s_listings[nftAddress][tokenId];
         if (listing.price > 0) {
             revert NftMarketplace__ItemAlreadyListed(nftAddress, tokenId);
+        }
+        _;
+    }
+
+    /// @notice Modifier to check if the seller is the owner of the NFT
+    modifier isOwner(
+        address nftAddress,
+        uint256 tokenId,
+        address seller
+    ) {
+        IERC721 nft = IERC721(nftAddress);
+        address owner = nft.ownerOf(tokenId);
+        if (seller != owner) {
+            revert NftMarketplace__NotOwner();
         }
         _;
     }
@@ -59,18 +71,23 @@ contract NftMarketplace {
     // 6.e.3: Fallback
     // 6.e.4: External
 
-    /// @notice List existing NFTs availables on the marketplace
-    /// @dev Owners hold their NFT and give approval to the marketplace to sell for them
-    /// @dev Approvals use getApproved function from EIP-721
+    /// @notice Add existing NFTs on the marketplace listing
+    /// @dev Owners hold one or more NFTs and give approval for the marketplace to sell it for them
+    /// @dev Approvals use "getApproved" function from EIP-721
     /// @dev Modifier "notYetListed" make sure the token is not already listed on the marketplace
+    /// @dev Modifier "isOwner" make sure the token owner is indeed the seller
     /// @param nftAddress The address of the NFT contract
     /// @param tokenId Index of the NFT in the NFT contract
-    /// @param price The current price of the NFT
+    /// @param price The initial price for the NFT
     function listItem(
         address nftAddress,
         uint256 tokenId,
         uint256 price
-    ) external notYetListed(nftAddress, tokenId, msg.sender) {
+    )
+        external
+        notYetListed(nftAddress, tokenId)
+        isOwner(nftAddress, tokenId, msg.sender)
+    {
         if (price <= 0) {
             revert NftMarketplace__PriceMustBeAboveZero();
         }
