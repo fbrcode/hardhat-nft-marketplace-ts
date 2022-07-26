@@ -55,3 +55,9 @@ contract MyContractName {
   // 6.e.8: View / Pure
 }
 ```
+
+## ERC 721 (EIP-721)
+
+Import from Openzeppelin ERC-721 boilerplate.
+
+`yarn add --dev @openzeppelin/contracts`
