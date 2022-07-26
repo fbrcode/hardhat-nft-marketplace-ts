@@ -1,0 +1,13 @@
+cache/
+artifacts/
+
+gas-reporter.log
+coverage*
+typechain/
+
+node_modules/
+.env
+
+deployments/
+
+resources/
