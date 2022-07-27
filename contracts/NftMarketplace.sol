@@ -18,6 +18,8 @@ error NftMarketplace__NotOwner();
 error NftMarketplace__NotListed(address nftAddress, uint256 tokenId);
 error NftMarketplace__PriceNotMet(address nftAddress, uint256 tokenId, uint256 price);
 error NftMarketplace__UpdatedPriceMustBeAboveZero();
+error NftMarketplace__NoProceeds();
+error NftMarketplace__TransferFailed();
 
 // 6: Contracts
 
@@ -190,14 +192,32 @@ contract NftMarketplace is ReentrancyGuard {
         emit ItemListed(msg.sender, nftAddress, tokenId, newPrice);
     }
 
+    /// @notice Withdraw all money from NFT selling on the marketplace
+    /// @dev Prevent reantrancy attacks #1 by locking the function
+    /// @dev Prevent reantrancy attacks #2 by setting the balance to 0 before the actual transfer
+    function withdrawProceeds() external nonReentrant {
+        uint256 proceeds = s_proceeds[msg.sender];
+        if (proceeds <= 0) {
+            revert NftMarketplace__NoProceeds();
+        }
+        // set proceeds storage to zero before transfering to avoid reentrancy attacks
+        s_proceeds[msg.sender] = 0;
+        // transfer the ETH to the seller
+        (bool success, ) = payable(msg.sender).call{value: proceeds}('');
+        if (!success) {
+            revert NftMarketplace__TransferFailed();
+        }
+    }
+
     // 6.e.5: Public
     // 6.e.6: Internal
     // 6.e.7: Private
     // 6.e.8: View / Pure
 }
 
+// TODO:
 //  1. `listItem`: List (adds) NFT on the marketplace ✅
 //  2. `buyItem`: Buy an NFT ✅
 //  3. `cancelListing`: Cancel an item listing ✅
 //  4. `updateListing`: Update price of an item listing ✅
-//  5. `withdrawProceeds`: Withdraw payment for my bought NFTs
+//  5. `withdrawProceeds`: Withdraw payment for my bought NFTs ✅
