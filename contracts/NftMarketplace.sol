@@ -5,6 +5,7 @@ pragma solidity ^0.8.7;
 
 // 2: Import statements
 import '@openzeppelin/contracts/token/ERC721/IERC721.sol';
+import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 
 // 3: Interfaces (none in this case)
 // 4: Libraries (none in this case)
@@ -22,7 +23,7 @@ error NftMarketplace__PriceNotMet(address nftAddress, uint256 tokenId, uint256 p
 /// @title NFT Marketplace
 /// @author Fabio Bressler
 /// @notice Contract for NFT management on the marketplace
-contract NftMarketplace {
+contract NftMarketplace is ReentrancyGuard {
     // 6.a: Type declarations
 
     struct Listing {
@@ -129,6 +130,7 @@ contract NftMarketplace {
         external
         payable
         isListed(nftAddress, tokenId)
+        nonReentrant // adds the locking mechanism (mutex) to avoid reentrancy attacks
     {
         Listing memory listedItem = s_listings[nftAddress][tokenId];
         if (msg.value < listedItem.price) {
@@ -144,6 +146,8 @@ contract NftMarketplace {
         // transfer the NFT to the buyer
         // instead of using the ERC721 transferFrom function ❌
         // we'll call the ERC721 safeTransferFrom function to avoid loosing the NFT ✅
+        // ⚠️ We run the transfer in the end to avoid reentrancy attacks
+        // Re-Entrancy: https://solidity-by-example.org/hacks/re-entrancy/
         IERC721(nftAddress).safeTransferFrom(listedItem.seller, msg.sender, tokenId);
         // trigger event for the buying transaction
         emit ItemBought(msg.sender, nftAddress, tokenId, listedItem.price);
