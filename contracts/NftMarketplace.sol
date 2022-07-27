@@ -54,6 +54,12 @@ contract NftMarketplace is ReentrancyGuard {
         uint256 price
     );
 
+    event ItemCancelled(
+        address indexed seller,
+        address indexed nftAddress,
+        uint256 indexed tokenId
+    );
+
     // 6.d: Modifiers
 
     /// @notice Modifier to ensure that the NFT is not listed on the marketplace
@@ -153,14 +159,24 @@ contract NftMarketplace is ReentrancyGuard {
         emit ItemBought(msg.sender, nftAddress, tokenId, listedItem.price);
     }
 
+    function cancelListing(address nftAddress, uint256 tokenId)
+        external
+        isOwner(nftAddress, tokenId, msg.sender)
+        isListed(nftAddress, tokenId)
+    {
+        // remove the item from the marketplace listing (mapping)
+        delete (s_listings[nftAddress][tokenId]);
+        emit ItemCancelled(msg.sender, nftAddress, tokenId);
+    }
+
     // 6.e.5: Public
     // 6.e.6: Internal
     // 6.e.7: Private
     // 6.e.8: View / Pure
 }
 
-//  1. `listItem`: List NFTs on the marketplace ✅
-//  2. `buyItem`: Buy the NFTs
-//  3. `cancelItem`: Cancel a listing
+//  1. `listItem`: List (adds) NFT on the marketplace ✅
+//  2. `buyItem`: Buy an NFT ✅
+//  3. `cancelListing`: Cancel an item listing ✅
 //  4. `updateListing`: Update price
 //  5. `withdrawProceeds`: Withdraw payment for my bought NFTs
