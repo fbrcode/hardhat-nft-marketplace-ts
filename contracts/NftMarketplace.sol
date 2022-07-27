@@ -14,6 +14,8 @@ error NftMarketplace__PriceMustBeAboveZero();
 error NftMarketplace__NotApprovedForMarketplace();
 error NftMarketplace__ItemAlreadyListed(address nftAddress, uint256 tokenId);
 error NftMarketplace__NotOwner();
+error NftMarketplace__NotListed(address nftAddress, uint256 tokenId);
+error NftMarketplace__PriceNotMet(address nftAddress, uint256 tokenId, uint256 price);
 
 // 6: Contracts
 
@@ -32,6 +34,10 @@ contract NftMarketplace {
     // NFT contract address --(mapped)--> NFT token ID --(mapped)--> Listing (price + seller)
     mapping(address => mapping(uint256 => Listing)) private s_listings;
 
+    // Keep track of how many money people have earned selling their NFTs
+    // Seller address --(mapped)--> Amount earned
+    mapping(address => uint256) private s_proceeds;
+
     // 6.c: Events
     event ItemListed(
         address indexed seller,
@@ -40,10 +46,17 @@ contract NftMarketplace {
         uint256 price
     );
 
+    event ItemBought(
+        address indexed buyer,
+        address indexed nftAddress,
+        uint256 indexed tokenId,
+        uint256 price
+    );
+
     // 6.d: Modifiers
 
-    /// @notice Modifier to check if the NFT was already listed on the marketplace
-    modifier notYetListed(address nftAddress, uint256 tokenId) {
+    /// @notice Modifier to ensure that the NFT is not listed on the marketplace
+    modifier isNotListed(address nftAddress, uint256 tokenId) {
         Listing memory listing = s_listings[nftAddress][tokenId];
         if (listing.price > 0) {
             revert NftMarketplace__ItemAlreadyListed(nftAddress, tokenId);
@@ -61,6 +74,15 @@ contract NftMarketplace {
         address owner = nft.ownerOf(tokenId);
         if (seller != owner) {
             revert NftMarketplace__NotOwner();
+        }
+        _;
+    }
+
+    /// @notice Modifier to ensure the the NFT item is already listed on the marketplace
+    modifier isListed(address nftAddress, uint256 tokenId) {
+        Listing memory listing = s_listings[nftAddress][tokenId];
+        if (listing.price <= 0) {
+            revert NftMarketplace__NotListed(nftAddress, tokenId);
         }
         _;
     }
@@ -83,11 +105,7 @@ contract NftMarketplace {
         address nftAddress,
         uint256 tokenId,
         uint256 price
-    )
-        external
-        notYetListed(nftAddress, tokenId)
-        isOwner(nftAddress, tokenId, msg.sender)
-    {
+    ) external isNotListed(nftAddress, tokenId) isOwner(nftAddress, tokenId, msg.sender) {
         if (price <= 0) {
             revert NftMarketplace__PriceMustBeAboveZero();
         }
@@ -101,6 +119,34 @@ contract NftMarketplace {
         s_listings[nftAddress][tokenId] = Listing(price, msg.sender);
         // trigger event for the listing transaction
         emit ItemListed(msg.sender, nftAddress, tokenId, price);
+    }
+
+    /// @notice Allow someone to buy an NFT from the marketplace
+    /// @dev Payable for the buyer to buy the NFT from the marketplace with ETH or other Layer-1 currency
+    /// @param nftAddress The address of the NFT contract
+    /// @param tokenId Index of the NFT in the NFT contract
+    function buyItem(address nftAddress, uint256 tokenId)
+        external
+        payable
+        isListed(nftAddress, tokenId)
+    {
+        Listing memory listedItem = s_listings[nftAddress][tokenId];
+        if (msg.value < listedItem.price) {
+            revert NftMarketplace__PriceNotMet(nftAddress, tokenId, listedItem.price);
+        }
+        // adds paid amount to the seller's account
+        // pull over push: https://fravoll.github.io/solidity-patterns/pull_over_push.html
+        // instead of sending the money to the user ❌
+        // we have then withdraw the money ✅
+        s_proceeds[listedItem.seller] += msg.value;
+        // remove the item from the marketplace listing (mapping)
+        delete (s_listings[nftAddress][tokenId]);
+        // transfer the NFT to the buyer
+        // instead of using the ERC721 transferFrom function ❌
+        // we'll call the ERC721 safeTransferFrom function to avoid loosing the NFT ✅
+        IERC721(nftAddress).safeTransferFrom(listedItem.seller, msg.sender, tokenId);
+        // trigger event for the buying transaction
+        emit ItemBought(msg.sender, nftAddress, tokenId, listedItem.price);
     }
 
     // 6.e.5: Public
