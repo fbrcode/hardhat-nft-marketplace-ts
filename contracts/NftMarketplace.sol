@@ -213,6 +213,18 @@ contract NftMarketplace is ReentrancyGuard {
     // 6.e.6: Internal
     // 6.e.7: Private
     // 6.e.8: View / Pure
+
+    function getListing(address nftAddress, uint256 tokenId)
+        external
+        view
+        returns (Listing memory)
+    {
+        return s_listings[nftAddress][tokenId];
+    }
+
+    function getProceeds(address seller) external view returns (uint256) {
+        return s_proceeds[seller];
+    }
 }
 
 // TODO:
