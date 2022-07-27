@@ -17,6 +17,7 @@ error NftMarketplace__ItemAlreadyListed(address nftAddress, uint256 tokenId);
 error NftMarketplace__NotOwner();
 error NftMarketplace__NotListed(address nftAddress, uint256 tokenId);
 error NftMarketplace__PriceNotMet(address nftAddress, uint256 tokenId, uint256 price);
+error NftMarketplace__UpdatedPriceMustBeAboveZero();
 
 // 6: Contracts
 
@@ -159,6 +160,9 @@ contract NftMarketplace is ReentrancyGuard {
         emit ItemBought(msg.sender, nftAddress, tokenId, listedItem.price);
     }
 
+    /// @notice Allow the owner to remove a listed NFT item from the marketplace
+    /// @param nftAddress The address of the NFT contract
+    /// @param tokenId Index of the NFT in the NFT contract
     function cancelListing(address nftAddress, uint256 tokenId)
         external
         isOwner(nftAddress, tokenId, msg.sender)
@@ -167,6 +171,23 @@ contract NftMarketplace is ReentrancyGuard {
         // remove the item from the marketplace listing (mapping)
         delete (s_listings[nftAddress][tokenId]);
         emit ItemCancelled(msg.sender, nftAddress, tokenId);
+    }
+
+    /// @notice Allow the owner to update the price of a listed NFT item in the marketplace
+    /// @dev As when the listing was created, the new price must be greater than zero
+    /// @param nftAddress The address of the NFT contract
+    /// @param tokenId Index of the NFT in the NFT contract
+    /// @param newPrice The new price for the NFT listing
+    function updateListing(
+        address nftAddress,
+        uint256 tokenId,
+        uint256 newPrice
+    ) external isOwner(nftAddress, tokenId, msg.sender) isListed(nftAddress, tokenId) {
+        if (newPrice <= 0) {
+            revert NftMarketplace__UpdatedPriceMustBeAboveZero();
+        }
+        s_listings[nftAddress][tokenId].price = newPrice;
+        emit ItemListed(msg.sender, nftAddress, tokenId, newPrice);
     }
 
     // 6.e.5: Public
@@ -178,5 +199,5 @@ contract NftMarketplace is ReentrancyGuard {
 //  1. `listItem`: List (adds) NFT on the marketplace ✅
 //  2. `buyItem`: Buy an NFT ✅
 //  3. `cancelListing`: Cancel an item listing ✅
-//  4. `updateListing`: Update price
+//  4. `updateListing`: Update price of an item listing ✅
 //  5. `withdrawProceeds`: Withdraw payment for my bought NFTs
