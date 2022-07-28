@@ -65,7 +65,7 @@ contract NftMarketplace is ReentrancyGuard {
 
     // 6.d: Modifiers
 
-    /// @notice Modifier to ensure that the NFT is not listed on the marketplace
+    /// @notice Modifier to ensure that the NFT is not listed already on the marketplace
     modifier isNotListed(address nftAddress, uint256 tokenId) {
         Listing memory listing = s_listings[nftAddress][tokenId];
         if (listing.price > 0) {
