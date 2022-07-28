@@ -9,7 +9,8 @@
     "compile": "hardhat compile",
     "deploy": "hardhat deploy",
     "test": "hardhat test",
-    "coverage": "hardhat coverage"
+    "coverage": "hardhat coverage",
+    "mint-list": "hardhat run scripts/mint-and-list.js --network localhost"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers",
