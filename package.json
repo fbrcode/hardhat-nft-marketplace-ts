@@ -6,7 +6,10 @@
   "license": "MIT",
   "scripts": {
     "clean": "hardhat clean",
-    "compile": "hardhat compile"
+    "compile": "hardhat compile",
+    "deploy": "hardhat deploy",
+    "test": "hardhat test",
+    "coverage": "hardhat coverage"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers",
