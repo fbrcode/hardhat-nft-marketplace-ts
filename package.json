@@ -11,7 +11,9 @@
     "test": "hardhat test",
     "coverage": "hardhat coverage",
     "mint-list": "hardhat run scripts/mint-and-list.js --network localhost",
-    "cancel-list": "hardhat run scripts/cancel-item.js --network localhost"
+    "list-only": "hardhat run scripts/list-only.js --network localhost",
+    "cancel-list": "hardhat run scripts/cancel-item.js --network localhost",
+    "buy-item": "hardhat run scripts/buy-item.js --network localhost"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers",
