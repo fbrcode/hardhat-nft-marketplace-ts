@@ -24,7 +24,7 @@ async function mintAndList() {
 
 mintAndList()
   .then(() => {
-    console.log('🏁 Mint And List done! 🏁');
+    console.log('Mint And List done! 🏁');
   })
   .catch((err) => {
     console.log(err);
