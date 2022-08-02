@@ -15,7 +15,8 @@
     "cancel-list": "hardhat run scripts/cancel-item.js --network localhost",
     "buy-item": "hardhat run scripts/buy-item.js --network localhost",
     "update-item": "hardhat run scripts/update-item.js --network localhost",
-    "get-token-uri": "hardhat run scripts/get-token-uri.js --network localhost"
+    "get-token-uri": "hardhat run scripts/get-token-uri.js --network localhost",
+    "mine-only": "hardhat run scripts/mine-only.js --network localhost"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers",
