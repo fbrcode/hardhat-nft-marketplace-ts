@@ -1,6 +1,11 @@
 const { network } = require('hardhat');
 const { verify } = require('../utils/verify');
 
+let waitConfirmations = 1;
+if (network.live) {
+  waitConfirmations = 5;
+}
+
 async function deployBasicNft({ getNamedAccounts, deployments }) {
   const { deploy, log } = deployments;
   const { deployer } = await getNamedAccounts();
@@ -12,7 +17,7 @@ async function deployBasicNft({ getNamedAccounts, deployments }) {
     from: deployer,
     args,
     log: true,
-    waitConfirmations: 1,
+    waitConfirmations: waitConfirmations,
   });
 
   log(`BasicNft Deployed!`);

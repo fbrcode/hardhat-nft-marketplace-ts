@@ -1,4 +1,10 @@
 const { network } = require('hardhat');
+const { verify } = require('../utils/verify');
+
+let waitConfirmations = 1;
+if (network.live) {
+  waitConfirmations = 5;
+}
 
 async function deployNftMarketplace({ getNamedAccounts, deployments }) {
   const { deploy, log } = deployments;
@@ -10,7 +16,7 @@ async function deployNftMarketplace({ getNamedAccounts, deployments }) {
     from: deployer,
     args,
     log: true,
-    waitConfirmations: 1,
+    waitConfirmations: waitConfirmations,
   });
   log(`NftMarketplace Deployed!`);
   log('----------------------------------------------------');
