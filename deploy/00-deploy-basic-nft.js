@@ -2,23 +2,28 @@ const { network } = require('hardhat');
 const { verify } = require('../utils/verify');
 
 async function deployBasicNft({ getNamedAccounts, deployments }) {
-  // deploy only on local for unit tests
-  if (!network.live) {
-    const { deploy, log } = deployments;
-    const { deployer } = await getNamedAccounts();
-    log('----------------------------------------------------');
-    log('Deploying BasicNft contract...');
+  const { deploy, log } = deployments;
+  const { deployer } = await getNamedAccounts();
+  log('----------------------------------------------------');
+  log('Deploying BasicNft contract...');
 
-    const args = [];
-    await deploy('BasicNft', {
-      from: deployer,
-      args,
-      log: true,
-      waitConfirmations: 1,
-    });
+  const args = [];
+  const basicNft = await deploy('BasicNft', {
+    from: deployer,
+    args,
+    log: true,
+    waitConfirmations: 1,
+  });
 
-    log(`BasicNft Deployed!`);
-    log('----------------------------------------------------');
+  log(`BasicNft Deployed!`);
+  log('----------------------------------------------------');
+
+  // if not deploying to local evm (check hardhat config for network.live = true)
+  if (network.live && process.env.ETHERSCAN_API_KEY) {
+    log(
+      `Verifying contract "${basicNft.address}" with args [${args}] on a live network: ${network.name} ...`
+    );
+    await verify(basicNft.address, args);
   }
 }
 
