@@ -17,7 +17,8 @@
     "update-item": "hardhat run scripts/update-item.js --network localhost",
     "get-token-uri": "hardhat run scripts/get-token-uri.js --network localhost",
     "mine-only": "hardhat run scripts/mine-only.js --network localhost",
-    "mint-only": "hardhat run scripts/mint-only.js --network localhost"
+    "mint-only": "hardhat run scripts/mint-only.js --network localhost",
+    "mint-list:rinkeby": "hardhat run scripts/mint-and-list.js --network rinkeby"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers",
